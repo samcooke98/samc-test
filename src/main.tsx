@@ -1,49 +1,33 @@
 import { StrictMode } from "react";
 import * as ReactDOMClient from "react-dom/client";
-import { BrowserRouter, Route, Routes, defer, DataBrowserRouter } from "react-router-dom";
+import { BrowserRouter, Route, Routes, defer, DataBrowserRouter, useRoutes } from "react-router-dom";
 import * as React from "react";
+import { RouteInfo } from ".";
 
 export function main({
   // I don't really like this aspect... The passing of things but
   // i guess it makes sense?
-  folderResource,
-  indexResource
+  routes
+}: {
+  routes: RouteInfo[],
 }) {
+  // TODO(sam.c): I wonder if we could improve the hot-reloading experience with this... I doubt
+  // it.. and I am probably coupling too many things together..
   const rootElement = document.getElementById("root");
   const root = ReactDOMClient.createRoot(rootElement);
 
-  const Folder = () => {
-    const PageImpl = folderResource.read();
-    return <PageImpl />;
-  };
 
-  const FolderRoute = () => {
-    return (
-      <React.Suspense fallback={<div>Loading...</div>}>
-        <Folder />
-      </React.Suspense>
-    );
-  };
+  function App() {
+    const element = useRoutes(routes);
 
-  const Index = () => {
-    const PageImpl = indexResource.read();
-    return <PageImpl />;
-  };
-  const IndexRoute = () => {
-    return (
-      <React.Suspense fallback={<div>Loading...</div>}>
-        <Index />
-      </React.Suspense>
-    );
-  };
+    return element;
+  }
+
 
   root.render(
     <StrictMode>
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<IndexRoute />} />
-          <Route path="/folder" element={<FolderRoute />} />
-        </Routes>
+        <App />
       </BrowserRouter>
     </StrictMode>
   );
